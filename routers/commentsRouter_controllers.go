@@ -55,4 +55,20 @@ func init() {
 			MethodParams: param.Make(),
 			Params: nil})
 
+	beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"] = append(beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"],
+		beego.ControllerComments{
+			Method: "ModifyPwd",
+			Router: `/modifypwd`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"] = append(beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"],
+		beego.ControllerComments{
+			Method: "RegisterUser",
+			Router: `/regiser`,
+			AllowHTTPMethods: []string{"post"},
+			MethodParams: param.Make(),
+			Params: nil})
+
 }

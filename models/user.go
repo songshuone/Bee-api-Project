@@ -5,17 +5,21 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-
 	"github.com/astaxie/beego/orm"
+	"strconv"
+	"crypto/md5"
+	"encoding/hex"
 )
 
 type User struct {
-	Id       int    `orm:"column(id);auto"`
-	Name     string `orm:"column(name);size(10)"`
-	Password string `orm:"column(password);size(10)"`
-	Address  string `orm:"column(address);size(20);null"`
-	Age      int    `orm:"column(age);null"`
-	Email    string `orm:"column(email);size(20);null"`
+	Id       int    `orm:"column(id);auto"json:"id"`
+	Name     string `orm:"column(name);size(10)" json:"name"`
+	Password string `orm:"column(password);size(10)"json:"-"` //json:"-"忽略此字段
+	Address  string `json:"address"orm:"column(address);size(20);null"`
+	Age      int    `json:"age"orm:"column(age);null"`
+	Email    string `json:"email"orm:"column(email);size(20);null"`
+	Birthday string `json:"birthday"orm:"column(birthday);size(20);null"`
+	//Birthday string `orm:"_"`
 }
 
 func (t *User) TableName() string {
@@ -152,13 +156,59 @@ func DeleteUser(id int) (err error) {
 	}
 	return
 }
-func Login(name string,password string) (bool,User){
+func Login(name string, password string) (bool, *User) {
 	o := orm.NewOrm()
-    values:=[]string{name,password}
-	var user User
-	r:=o.Raw("SELECT * FROM user WHERE name = ? && password=?", values).QueryRow(&user)
-	if  r==nil{
-		return true,user
+	values := []string{name, Md5(password)}
+	var u *User
+	r := o.Raw("SELECT * FROM user WHERE name = ? && password=?", values).QueryRow(&u)
+	if r == nil {
+		return true, u
 	}
-	return false,user
+	return false, u
+}
+
+//md5加密        return 加密 后的字符串
+//values  待加密的字符串
+func Md5(values string) string {
+	h := md5.New()
+	h.Write([]byte(values))
+	return hex.EncodeToString(h.Sum(nil))
+}
+func RegisterUser(username string, password string) error {
+	o := orm.NewOrm()
+	var u User
+	if r := o.Raw("select * from user where name = ?", []string{username}).QueryRow(&u); r == nil {
+		return errors.New("该用户名存在，请重新输入用户名")
+	} else {
+
+		_, erro := o.Insert(&User{Name: username, Password: Md5(password)})
+		if erro != nil {
+			return errors.New("注册失败")
+		} else {
+			return nil
+		}
+	}
+}
+
+//根据id修改密码
+func ModifyPwd(uid string, password string) error {
+	o := orm.NewOrm()
+	id, erro := strconv.Atoi(uid)
+	if erro != nil {
+		return erro
+	} else {
+		v := &User{Id: id}
+		erro := o.Read(v)
+		if erro != nil {
+			return errors.New("该用户不存在")
+		} else {
+			v.Password = Md5(password)
+			_, erro := o.Update(v)
+			if erro == nil {
+				return nil
+			} else {
+				return erro
+			}
+		}
+	}
 }

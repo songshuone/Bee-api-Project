@@ -129,6 +129,72 @@
                 }
             }
         },
+        "/user/modifypwd": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "description": "ModifyPwd the User",
+                "operationId": "UserController.ModifyPwd",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "id",
+                        "description": "The id you want to modify",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "password",
+                        "description": "The password you want to reset pwd",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{string} 修改 success!"
+                    },
+                    "403": {
+                        "description": "修改 fail"
+                    }
+                }
+            }
+        },
+        "/user/regiser": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "description": "login the User",
+                "operationId": "UserController.RegisterUser",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "name",
+                        "description": "The name you want to login",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "password",
+                        "description": "The password you want to login",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{string} RegisterUser success!"
+                    },
+                    "403": {
+                        "description": "register fail"
+                    }
+                }
+            }
+        },
         "/user/{id}": {
             "get": {
                 "tags": [
@@ -222,24 +288,24 @@
             "title": "User",
             "type": "object",
             "properties": {
-                "Address": {
+                "address": {
                     "type": "string"
                 },
-                "Age": {
+                "age": {
                     "type": "integer",
                     "format": "int64"
                 },
-                "Email": {
+                "birthday": {
                     "type": "string"
                 },
-                "Id": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "integer",
                     "format": "int64"
                 },
-                "Name": {
-                    "type": "string"
-                },
-                "Password": {
+                "name": {
                     "type": "string"
                 }
             }

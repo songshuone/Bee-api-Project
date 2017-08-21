@@ -7,12 +7,19 @@ import (
 	"strconv"
 	"strings"
 	"github.com/astaxie/beego"
-	"fmt"
 )
 
 // UserController operations for User
 type UserController struct {
 	beego.Controller
+}
+
+var responseData models.ResponseData
+
+func init() {
+	responseData.Result = ""
+	responseData.Status = 200
+	responseData.Message = ""
 }
 
 // URLMapping ...
@@ -23,6 +30,8 @@ func (c *UserController) URLMapping() {
 	c.Mapping("Put", c.Put)
 	c.Mapping("Delete", c.Delete)
 	c.Mapping("Login", c.Login)
+	c.Mapping("RegisterUser", c.RegisterUser)
+	c.Mapping("ModifyPwd",c.ModifyPwd)
 }
 
 // Post ...
@@ -123,7 +132,9 @@ func (c *UserController) GetAll() {
 	if err != nil {
 		c.Data["json"] = err.Error()
 	} else {
-		c.Data["json"] = l
+		responseData.Result = l
+		responseData.Message = "获取数据成功"
+		c.Data["json"] = responseData
 	}
 	c.ServeJSON()
 }
@@ -169,6 +180,7 @@ func (c *UserController) Delete() {
 	}
 	c.ServeJSON()
 }
+
 //Login...
 //@Title Login
 // @Description login the User
@@ -177,14 +189,103 @@ func (c *UserController) Delete() {
 // @Success 200 {string} login success!
 // @Failure 403 user no exist
 //@router /login [get]
-func (c *UserController) Login()  {
-	usernameStr:=c.GetString("name")
-	passwordStr:=c.GetString("password")
-	isSucess,user:=models.Login(usernameStr,passwordStr)
-	if isSucess{
-		c.Data["json"]="login sucess"+usernameStr+passwordStr+fmt.Sprint(user)
-	}else {
-		c.Data["json"]="user no exist"+usernameStr+passwordStr+fmt.Sprint(user)
+func (c *UserController) Login() {
+	usernameStr := c.GetString("name")
+	passwordStr := c.GetString("password")
+	isSucess, u := models.Login(usernameStr, passwordStr)
+	if isSucess {
+		sess,_:=beego.GlobalSessions.SessionStart(c.Ctx.ResponseWriter,c.Ctx.Request)
+		defer sess.SessionRelease(c.Ctx.ResponseWriter)
+		//sess.Set("username",)
+		//se:=c.GetSession("api")
+		//if se==nil{
+		//	c.SetSession("api",int(1))
+		//}else {
+		//	c.SetSession("api",int(1)+1)
+		//}
+		responseData.Message = "登录成功"+"session:"//+fmt.Sprint(c.GetSession("api"))
+		responseData.Status = 200
+		responseData.Result = &u
+		c.Data["json"] = responseData
+	} else {
+		responseData.Message = "用户名或密码不对"
+		responseData.Status = 403
+		c.Data["json"] = responseData.Response
 	}
-     c.ServeJSON()
+	c.ServeJSON()
+}
+
+//RegisterUser...
+//@Title RegisterUser
+// @Description login the User
+// @Param	name		query 	string	true		"The name you want to login"
+// @Param	password		query 	string	true		"The password you want to login"
+// @Success 200 {string} RegisterUser success!
+// @Failure 403 register fail
+//@router /regiser [post]
+func (u *UserController) RegisterUser() {
+	name := u.GetString("name")
+	password := u.GetString("password")
+	responseData.Status = 403
+	if len(name) < 3 || len(name) > 10 {
+		responseData.Message = "用户名长度在3到10个"
+		u.Data["json"] = responseData.Response
+		u.ServeJSON()
+		return
+	}
+	if len(password) < 3 || len(password) > 10 {
+		responseData.Message = "密码长度在3到10个"
+		u.Data["json"] = responseData.Response
+		u.ServeJSON()
+		return
+	}
+	erro := models.RegisterUser(name, password)
+	if erro == nil {
+		responseData.Message = "注册成功"
+		responseData.Status = 200
+		u.Data["json"] = responseData.Response
+	} else {
+		responseData.Message = erro.Error()
+		responseData.Status = 403
+		u.Data["json"] = responseData.Response
+	}
+	u.ServeJSON()
+}
+
+//ModifyPwd...
+//@Title ModifyPwd
+// @Description ModifyPwd the User
+// @Param	id		query 	string	true		"The id you want to modify"
+// @Param	password		query 	string	true		"The password you want to reset pwd"
+// @Success 200 {string} 修改 success!
+// @Failure 403 修改 fail
+//@router /modifypwd [post]
+func (u *UserController) ModifyPwd() {
+    id:=u.GetString("id")
+	password:=u.GetString("password")
+	if len(id)==0 {
+		responseData.Message="用户id有误"
+		responseData.Status=403
+		u.Data["json"]=responseData.Response
+		u.ServeJSON()
+		return
+	}
+	if len(password)<6||len(password)>15{
+		responseData.Message="密码为6至15位"
+		responseData.Status=401
+		u.Data["json"]=responseData.Response
+		u.ServeJSON()
+		return
+	}
+	if erro:=models.ModifyPwd(id,password);erro == nil{
+		responseData.Message="修改成功"
+		responseData.Status=200
+		u.Data["json"]=responseData.Response
+	}else {
+		responseData.Message=erro.Error()
+		responseData.Status=401
+		u.Data["json"]=responseData.Response
+	}
+	u.ServeJSON()
+
 }
