@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"github.com/astaxie/beego"
+	"fmt"
+
 )
 
 // UserController operations for User
@@ -194,18 +196,20 @@ func (c *UserController) Login() {
 	passwordStr := c.GetString("password")
 	isSucess, u := models.Login(usernameStr, passwordStr)
 	if isSucess {
-		sess,_:=beego.GlobalSessions.SessionStart(c.Ctx.ResponseWriter,c.Ctx.Request)
-		defer sess.SessionRelease(c.Ctx.ResponseWriter)
-		//sess.Set("username",)
-		//se:=c.GetSession("api")
-		//if se==nil{
-		//	c.SetSession("api",int(1))
-		//}else {
-		//	c.SetSession("api",int(1)+1)
-		//}
-		responseData.Message = "登录成功"+"session:"//+fmt.Sprint(c.GetSession("api"))
+		v:=c.GetSession("api")
+		var result models.UserLogin
+		//r:=	rand.New(rand.NewSource(time.Now().UnixNano()))
+		if v==nil{
+			c.SetSession("api",int(1))
+		}else {
+			c.SetSession("api",v.(int)+1)
+		}
+		v=c.GetSession("api")
+		result.Session=models.Md5(fmt.Sprint(v.(int)))
+		responseData.Message = "登录成功"
 		responseData.Status = 200
-		responseData.Result = &u
+		result.User=u
+		responseData.Result =&result
 		c.Data["json"] = responseData
 	} else {
 		responseData.Message = "用户名或密码不对"
@@ -278,7 +282,12 @@ func (u *UserController) ModifyPwd() {
 		return
 	}
 	if erro:=models.ModifyPwd(id,password);erro == nil{
-		responseData.Message="修改成功"
+		v:=u.GetSession("api")
+		if v!=nil {
+			responseData.Message="修改成功session;"+models.Md5(fmt.Sprint(v.(int)))
+		}else {
+			responseData.Message="修改成功session=null"
+		}
 		responseData.Status=200
 		u.Data["json"]=responseData.Response
 	}else {

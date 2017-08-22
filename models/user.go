@@ -11,6 +11,11 @@ import (
 	"encoding/hex"
 )
 
+type UserLogin struct {
+	Session string `json:"session"`
+	User *User
+} 
+
 type User struct {
 	Id       int    `orm:"column(id);auto"json:"id"`
 	Name     string `orm:"column(name);size(10)" json:"name"`
@@ -171,7 +176,7 @@ func Login(name string, password string) (bool, *User) {
 //values  待加密的字符串
 func Md5(values string) string {
 	h := md5.New()
-	h.Write([]byte(values))
+	h.Write([]byte(values+"wp"))
 	return hex.EncodeToString(h.Sum(nil))
 }
 func RegisterUser(username string, password string) error {

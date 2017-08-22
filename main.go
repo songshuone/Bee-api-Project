@@ -22,17 +22,17 @@ func init() {
 	// "cookieLifeTime": 3600,
 	// "providerConfig": ""}`)
 	//go globalSessions.GC()
-	GlobalSessions,_=session.NewManager("memory",&session.ManagerConfig{
-		CookieName:"api",
-		EnableSetCookie:true,
-		Gclifetime:3600,
-		Maxlifetime:3600,
-		Secure:false,
-		ProviderConfig:"",
-		CookieLifeTime:3600,
-
-	})
-	defer globalSessions.GC()
+	//GlobalSessions,_=session.NewManager("memory",&session.ManagerConfig{
+	//	CookieName:"api",
+	//	EnableSetCookie:true,
+	//	Gclifetime:3600,
+	//	Maxlifetime:3600,
+	//	Secure:false,
+	//	ProviderConfig:"",
+	//	CookieLifeTime:3600,
+	//
+	//})
+	//defer globalSessions.GC()
 
 	orm.RegisterDataBase("default", "mysql", "root:root@tcp(127.0.0.1:3306)/go?charset=utf8")
 }
