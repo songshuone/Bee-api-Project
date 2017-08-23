@@ -284,10 +284,26 @@
         }
     },
     "definitions": {
+        "models.Post": {
+            "title": "Post",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.User": {
             "title": "User",
             "type": "object",
             "properties": {
+                "Post": {
+                    "$ref": "#/definitions/models.Post"
+                },
                 "address": {
                     "type": "string"
                 },

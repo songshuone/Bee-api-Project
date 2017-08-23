@@ -13,8 +13,8 @@ import (
 
 type UserLogin struct {
 	Session string `json:"session"`
-	User *User
-} 
+	User    *User
+}
 
 type User struct {
 	Id       int    `orm:"column(id);auto"json:"id"`
@@ -25,6 +25,11 @@ type User struct {
 	Email    string `json:"email"orm:"column(email);size(20);null"`
 	Birthday string `json:"birthday"orm:"column(birthday);size(20);null"`
 	//Birthday string `orm:"_"`
+	Post *Post `orm:"rel(fk)"`
+}
+type Post struct {
+	Id    int `json:"id"`
+	Title string `json:"title"`
 }
 
 func (t *User) TableName() string {
@@ -32,7 +37,7 @@ func (t *User) TableName() string {
 }
 
 func init() {
-	orm.RegisterModel(new(User))
+	orm.RegisterModel(new(User), new(Post))
 }
 
 // AddUser insert a new User into database and returns
@@ -45,13 +50,28 @@ func AddUser(m *User) (id int64, err error) {
 
 // GetUserById retrieves User by Id. Returns error if
 // Id doesn't exist
-func GetUserById(id int) (v *User, err error) {
+func GetUserById(id int) (*User, error) {
 	o := orm.NewOrm()
-	v = &User{Id: id}
-	if err = o.Read(v); err == nil {
-		return v, nil
+	//关系查询1
+	//v = &User{Id: id}
+	//var v1 User
+	//qs:=o.QueryTable(new(User))
+	//if err := qs.Exclude("address__isnull",true).Filter("id",id).One(&v1); err == nil {
+	//	o.Read(v1.Post)
+	//	return &v1, nil
+	//}else{
+	//	return nil, err
+	//}
+
+	//关系查询2
+	user := &User{}
+	if err := o.QueryTable(new(User)).Filter("id", id).RelatedSel().One(user); err == nil {
+		fmt.Println(user.Post)
+		return user, err
+	} else {
+		return nil, err
 	}
-	return nil, err
+
 }
 
 // GetAllUser retrieves all User matches certain condition. Returns empty list if
@@ -86,7 +106,7 @@ func GetAllUser(query map[string]string, fields []string, sortby []string, order
 				}
 				sortFields = append(sortFields, orderby)
 			}
-			qs = qs.OrderBy(sortFields...)
+			qs = qs.OrderBy(sortFields...) //排序
 		} else if len(sortby) != len(order) && len(order) == 1 {
 			// 2) there is exactly one order, all the sorted fields will be sorted by this order
 			for _, v := range sortby {
@@ -111,6 +131,7 @@ func GetAllUser(query map[string]string, fields []string, sortby []string, order
 
 	var l []User
 	qs = qs.OrderBy(sortFields...)
+	//, fields...
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
 			for _, v := range l {
@@ -176,7 +197,7 @@ func Login(name string, password string) (bool, *User) {
 //values  待加密的字符串
 func Md5(values string) string {
 	h := md5.New()
-	h.Write([]byte(values+"wp"))
+	h.Write([]byte(values + "wp"))
 	return hex.EncodeToString(h.Sum(nil))
 }
 func RegisterUser(username string, password string) error {
@@ -217,3 +238,26 @@ func ModifyPwd(uid string, password string) error {
 		}
 	}
 }
+
+//
+//func GAO()  {
+//	o:=orm.NewOrm()
+//	qs:=o.QueryTable("user")
+//	qs.Filter("name","wp123")
+//
+//
+//	qs.Exclude("address__isnull",true).Filter("name","wp1234")
+//
+//
+//	qs.Limit(10)//限制10条数据
+//
+//	qs.Limit(10,20)
+//
+//	qs.Limit(-1)//不限制
+//
+//	qs.GroupBy("id","age")
+//
+//	qs.OrderBy("id")
+//	qs.Distinct()//返回 不重复的数据
+//
+//}

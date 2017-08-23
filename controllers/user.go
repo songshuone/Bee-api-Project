@@ -94,8 +94,8 @@ func (c *UserController) GetAll() {
 	var sortby []string
 	var order []string
 	var query = make(map[string]string)
-	var limit int64 = 10
-	var offset int64
+	var limit int64 = 10  //每页限制多少个数据
+	var offset int64=0  //从那个位置开始查询
 
 	// fields: col1,col2,entity.col3
 	if v := c.GetString("fields"); v != "" {
