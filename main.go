@@ -7,6 +7,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/astaxie/beego/session"
+	"fmt"
 )
 
 var GlobalSessions  *session.Manager
@@ -41,6 +42,12 @@ func main() {
 	if beego.BConfig.RunMode == "dev" {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
+	}
+	orm.RunCommand()
+
+	error:=orm.RunSyncdb("default",true,true)
+	if error!=nil{
+		fmt.Println(error)
 	}
 	beego.Run()
 }

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"crypto/md5"
 	"encoding/hex"
+	"net"
 )
 
 type UserLogin struct {
@@ -25,11 +26,16 @@ type User struct {
 	Email    string `json:"email"orm:"column(email);size(20);null"`
 	Birthday string `json:"birthday"orm:"column(birthday);size(20);null"`
 	//Birthday string `orm:"_"`
-	Post *Post `orm:"rel(fk)"`
+	Post *Post `orm:"rel(fk);on_delete(do_nothing)"`
 }
 type Post struct {
 	Id    int `json:"id"`
-	Title string `json:"title"`
+	Title string `json:"title",orm:"null"`
+	Tags *Tag `json:"tags",orm:"rel(fk);null"`
+}
+type Tag struct {
+	Id int `json:"id"`
+	Name string `orm:"null;" json:"name"`
 }
 
 func (t *User) TableName() string {
@@ -37,7 +43,7 @@ func (t *User) TableName() string {
 }
 
 func init() {
-	orm.RegisterModel(new(User), new(Post))
+	orm.RegisterModel(new(User), new(Post),new(Tag))
 }
 
 // AddUser insert a new User into database and returns
@@ -202,14 +208,13 @@ func Md5(values string) string {
 }
 func RegisterUser(username string, password string) error {
 	o := orm.NewOrm()
-	var u User
-	if r := o.Raw("select * from user where name = ?", []string{username}).QueryRow(&u); r == nil {
+	 u :=User{Name:username}
+	if r := o.Read(&u,"name"); r == nil {
 		return errors.New("该用户名存在，请重新输入用户名")
 	} else {
-
 		_, erro := o.Insert(&User{Name: username, Password: Md5(password)})
 		if erro != nil {
-			return errors.New("注册失败")
+			return erro
 		} else {
 			return nil
 		}
@@ -239,25 +244,30 @@ func ModifyPwd(uid string, password string) error {
 	}
 }
 
-//
-//func GAO()  {
-//	o:=orm.NewOrm()
-//	qs:=o.QueryTable("user")
-//	qs.Filter("name","wp123")
-//
-//
-//	qs.Exclude("address__isnull",true).Filter("name","wp1234")
-//
-//
-//	qs.Limit(10)//限制10条数据
-//
-//	qs.Limit(10,20)
-//
-//	qs.Limit(-1)//不限制
-//
-//	qs.GroupBy("id","age")
-//
-//	qs.OrderBy("id")
-//	qs.Distinct()//返回 不重复的数据
-//
-//}
+
+func GAO()  {
+	o:=orm.NewOrm()
+	qs:=o.QueryTable("user")
+	qs.Filter("name","wp123")
+
+
+	qs.Exclude("address__isnull",true).Filter("name","wp1234")
+
+
+	qs.Limit(10)//限制10条数据
+
+	qs.Limit(10,20)
+
+	qs.Limit(-1)//不限制
+
+	qs.GroupBy("id","age")
+
+	qs.OrderBy("id")
+	qs.Distinct()//返回 不重复的数据
+	//age在原来的基础上增加10    支持加减乘除
+	qs.Update(orm.Params{"name":"wp","age":orm.ColValue(orm.ColAdd,10),"address":"gs供电所"})
+
+
+	i,_:=qs.PrepareInsert()
+	i.Insert(User{})
+}
