@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"crypto/md5"
 	"encoding/hex"
-	"net"
 )
 
 type UserLogin struct {
@@ -20,22 +19,30 @@ type UserLogin struct {
 type User struct {
 	Id       int    `orm:"column(id);auto"json:"id"`
 	Name     string `orm:"column(name);size(10)" json:"name"`
-	Password string `orm:"column(password);size(10)"json:"-"` //json:"-"忽略此字段
+	Password string `orm:"column(password);size(255)"json:"-"` //json:"-"忽略此字段
 	Address  string `json:"address"orm:"column(address);size(20);null"`
 	Age      int    `json:"age"orm:"column(age);null"`
 	Email    string `json:"email"orm:"column(email);size(20);null"`
 	Birthday string `json:"birthday"orm:"column(birthday);size(20);null"`
 	//Birthday string `orm:"_"`
-	Post *Post `orm:"rel(fk);on_delete(do_nothing)"`
+	Post *Post `orm:"rel(fk);on_delete(do_nothing);null" json:"post"`
 }
 type Post struct {
 	Id    int `json:"id"`
 	Title string `json:"title",orm:"null"`
-	Tags *Tag `json:"tags",orm:"rel(fk);null"`
+	Tags  []*Tag `orm:"rel(m2m);null;rel_table(post_tag_rel)",json:"tags"`
 }
+
+//type PostTagRel struct{
+//	Id int `json:"id"`
+//	Posts *Post `json:"posts"`
+//	Tags *Tag `json:"tags"`
+//}
+
 type Tag struct {
-	Id int `json:"id"`
-	Name string `orm:"null;" json:"name"`
+	Id    int `json:"id"`
+	Name  string `orm:"null;" json:"name"`
+	Posts []*Post `orm:"reverse(many)"`
 }
 
 func (t *User) TableName() string {
@@ -43,7 +50,7 @@ func (t *User) TableName() string {
 }
 
 func init() {
-	orm.RegisterModel(new(User), new(Post),new(Tag))
+	orm.RegisterModel(new(User), new(Post), new(Tag))
 }
 
 // AddUser insert a new User into database and returns
@@ -141,6 +148,11 @@ func GetAllUser(query map[string]string, fields []string, sortby []string, order
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
 			for _, v := range l {
+				if v.Post != nil {
+					o.Read(v.Post)
+					//读取多对多的数据
+					o.QueryTable("tag").Filter("Posts__Post__Id", v.Post.Id).All(&v.Post.Tags)
+				}
 				ml = append(ml, v)
 			}
 		} else {
@@ -208,8 +220,8 @@ func Md5(values string) string {
 }
 func RegisterUser(username string, password string) error {
 	o := orm.NewOrm()
-	 u :=User{Name:username}
-	if r := o.Read(&u,"name"); r == nil {
+	u := User{Name: username}
+	if r := o.Read(&u, "name"); r == nil {
 		return errors.New("该用户名存在，请重新输入用户名")
 	} else {
 		_, erro := o.Insert(&User{Name: username, Password: Md5(password)})
@@ -244,30 +256,29 @@ func ModifyPwd(uid string, password string) error {
 	}
 }
 
-
-func GAO()  {
-	o:=orm.NewOrm()
-	qs:=o.QueryTable("user")
-	qs.Filter("name","wp123")
-
-
-	qs.Exclude("address__isnull",true).Filter("name","wp1234")
-
-
-	qs.Limit(10)//限制10条数据
-
-	qs.Limit(10,20)
-
-	qs.Limit(-1)//不限制
-
-	qs.GroupBy("id","age")
-
-	qs.OrderBy("id")
-	qs.Distinct()//返回 不重复的数据
-	//age在原来的基础上增加10    支持加减乘除
-	qs.Update(orm.Params{"name":"wp","age":orm.ColValue(orm.ColAdd,10),"address":"gs供电所"})
-
-
-	i,_:=qs.PrepareInsert()
-	i.Insert(User{})
-}
+//func GAO()  {
+//	o:=orm.NewOrm()
+//	qs:=o.QueryTable("user")
+//	qs.Filter("name","wp123")
+//
+//
+//	qs.Exclude("address__isnull",true).Filter("name","wp1234")
+//
+//
+//	qs.Limit(10)//限制10条数据
+//
+//	qs.Limit(10,20)
+//
+//	qs.Limit(-1)//不限制
+//
+//	qs.GroupBy("id","age")
+//
+//	qs.OrderBy("id")
+//	qs.Distinct()//返回 不重复的数据
+//	//age在原来的基础上增加10    支持加减乘除
+//	qs.Update(orm.Params{"name":"wp","age":orm.ColValue(orm.ColAdd,10),"address":"gs供电所"})
+//
+//
+//	i,_:=qs.PrepareInsert()
+//	i.Insert(User{})
+//}

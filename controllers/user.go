@@ -8,7 +8,6 @@ import (
 	"strings"
 	"github.com/astaxie/beego"
 	"fmt"
-
 )
 
 // UserController operations for User
@@ -17,6 +16,8 @@ type UserController struct {
 }
 
 var responseData models.ResponseData
+
+
 
 func init() {
 	responseData.Result = ""

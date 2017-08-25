@@ -6,11 +6,10 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/astaxie/beego/session"
-	"fmt"
+	//"fmt"
 )
 
-var GlobalSessions  *session.Manager
+//var GlobalSessions  *session.Manager
 func init() {
 
 	//globalSessions, _ = session.NewManager("memory", `{"cookieName":"gosessionid",
@@ -35,7 +34,7 @@ func init() {
 	//})
 	//defer globalSessions.GC()
 
-	orm.RegisterDataBase("default", "mysql", "root:root@tcp(127.0.0.1:3306)/go?charset=utf8")
+	orm.RegisterDataBase("default", "mysql", "root:root@tcp(127.0.0.1:3306)/go_g?charset=utf8")
 }
 
 func main() {
@@ -43,11 +42,14 @@ func main() {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
-	orm.RunCommand()
-
-	error:=orm.RunSyncdb("default",true,true)
-	if error!=nil{
-		fmt.Println(error)
-	}
+	beego.Debug()
 	beego.Run()
+
+
+	//orm.RunCommand()
+	//
+	//error:=orm.RunSyncdb("default",true,true)
+	//if error!=nil{
+	//	fmt.Println(error)
+	//}
 }

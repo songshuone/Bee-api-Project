@@ -288,6 +288,12 @@
             "title": "Post",
             "type": "object",
             "properties": {
+                "Tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Tag"
+                    }
+                },
                 "id": {
                     "type": "integer",
                     "format": "int64"
@@ -297,13 +303,29 @@
                 }
             }
         },
+        "models.Tag": {
+            "title": "Tag",
+            "type": "object",
+            "properties": {
+                "Posts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Post"
+                    }
+                },
+                "id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "models.User": {
             "title": "User",
             "type": "object",
             "properties": {
-                "Post": {
-                    "$ref": "#/definitions/models.Post"
-                },
                 "address": {
                     "type": "string"
                 },
@@ -323,6 +345,9 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "post": {
+                    "$ref": "#/definitions/models.Post"
                 }
             }
         }
