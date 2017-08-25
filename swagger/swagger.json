@@ -15,6 +15,23 @@
     },
     "basePath": "/v1",
     "paths": {
+        "/banner/": {
+            "get": {
+                "tags": [
+                    "banner"
+                ],
+                "description": "get banner",
+                "operationId": "BannerControllers.get",
+                "responses": {
+                    "200": {
+                        "description": "{int} models.Banner"
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
         "/user/": {
             "get": {
                 "tags": [

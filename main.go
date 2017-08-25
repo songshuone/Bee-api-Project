@@ -44,7 +44,8 @@ func main() {
 	}
 	beego.Debug()
 	beego.Run()
-
+	// orm.RunCommand()
+	// orm.RunSyncdb("default", true, true)
 
 
 }
