@@ -42,7 +42,7 @@ type Post struct {
 type Tag struct {
 	Id    int `json:"id"`
 	Name  string `orm:"null;" json:"name"`
-	Posts []*Post `orm:"reverse(many)"`
+	Posts []*Post `orm:"reverse(many)" json:"-"`
 }
 
 func (t *User) TableName() string {

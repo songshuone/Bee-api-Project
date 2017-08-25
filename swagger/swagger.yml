@@ -206,10 +206,6 @@ definitions:
     title: Tag
     type: object
     properties:
-      Posts:
-        type: array
-        items:
-          $ref: '#/definitions/models.Post'
       id:
         type: integer
         format: int64

@@ -46,10 +46,5 @@ func main() {
 	beego.Run()
 
 
-	//orm.RunCommand()
-	//
-	//error:=orm.RunSyncdb("default",true,true)
-	//if error!=nil{
-	//	fmt.Println(error)
-	//}
+
 }

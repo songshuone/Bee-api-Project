@@ -1,1 +1,55 @@
 一个用beego写的一个简单的服务器api 接口
+
+bee run -downdoc=true -gendoc=true
+
+使用stuct 自动生成数据库中的表：
+
+
+ func main() {
+     // orm.RegisterModel...
+     // orm.RegisterDataBase...
+     ...
+     orm.RunCommand()
+ }
+ go build main.go
+ ./main orm
+ # 直接执行可以显示帮助
+ # 如果你的程序可以支持的话，直接运行 go run main.go orm 也是一样的效果
+ 自动建表
+
+
+首先  在main.go中  写：
+
+// 数据库别名
+name := "default"
+
+// drop table 后再建表
+force := true
+
+// 打印执行过程
+verbose := true
+
+// 遇到错误立即返回
+err := orm.RunSyncdb(name, force, verbose)
+if err != nil {
+    fmt.Println(err)
+}
+
+
+
+执行命令：   main orm syncdb -h     就可以看到创建表的sql语句
+./main orm syncdb -h
+Usage of orm command: syncdb:
+  -db="default": DataBase alias name
+  -force=false: drop tables before create
+  -v=false: verbose info
+
+
+ 命令模式
+ 注册模型与数据库以后，调用 RunCommand 执行 orm 命令。
+
+
+
+
+
+
