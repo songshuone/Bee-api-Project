@@ -34,7 +34,7 @@ func init() {
 	//})
 	//defer globalSessions.GC()
 
-	orm.RegisterDataBase("default", "mysql", "root:root@tcp(127.0.0.1:3306)/go_g?charset=utf8")
+	orm.RegisterDataBase("default", "mysql", "root:root@tcp(66.112.221.239:3306)/go_g?charset=utf8")
 }
 
 func main() {

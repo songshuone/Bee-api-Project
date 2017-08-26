@@ -146,6 +146,32 @@
                 }
             }
         },
+        "/user/logout": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "description": "ModifyPwd the User",
+                "operationId": "UserController.ModifyPwd",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "session",
+                        "description": "The id you want to modify",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{string}注销成功"
+                    },
+                    "403": {
+                        "description": "你还没有登录"
+                    }
+                }
+            }
+        },
         "/user/modifypwd": {
             "post": {
                 "tags": [
@@ -157,6 +183,13 @@
                     {
                         "in": "query",
                         "name": "id",
+                        "description": "The id you want to modify",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "session",
                         "description": "The id you want to modify",
                         "required": true,
                         "type": "string"

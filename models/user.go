@@ -8,7 +8,8 @@ import (
 	"github.com/astaxie/beego/orm"
 	"strconv"
 	"crypto/md5"
-	"encoding/hex"
+	"io"
+	"math"
 )
 
 type UserLogin struct {
@@ -210,13 +211,17 @@ func Login(name string, password string) (bool, *User) {
 	}
 	return false, u
 }
-
+func GetMD5(lurl string) string {
+	h := md5.New()
+	salt1 := "salt4shorturlwp123"+fmt.Sprint(math.Phi*math.Pi)
+	io.WriteString(h, lurl+salt1)
+	urlmd5 := fmt.Sprintf("%x", h.Sum(nil))
+	return urlmd5
+}
 //md5加密        return 加密 后的字符串
 //values  待加密的字符串
 func Md5(values string) string {
-	h := md5.New()
-	h.Write([]byte(values + "wp"))
-	return hex.EncodeToString(h.Sum(nil))
+	return GetMD5(values)
 }
 func RegisterUser(username string, password string) error {
 	o := orm.NewOrm()
@@ -255,6 +260,7 @@ func ModifyPwd(uid string, password string) error {
 		}
 	}
 }
+
 
 //func GAO()  {
 //	o:=orm.NewOrm()
