@@ -9,7 +9,6 @@ package routers
 
 import (
 	"Bee-api-Project/controllers"
-
 	"github.com/astaxie/beego"
 	//"github.com/astaxie/beego/context"
 	//"fmt"
@@ -37,14 +36,22 @@ func init() {
 		),
 	)
 	ns.Filter("before", func(context *context.Context) {
-		if strings.Contains(context.Request.RequestURI , "/v1/user/login" ){
+		requestUrl:=context.Request.RequestURI
+		if strings.Contains(requestUrl , "/v1/user/login" ){
+			return
+		}
+		if  strings.Contains(requestUrl,"banner"){
+			return
+		}
+		if  strings.Contains(requestUrl,"v1"){
 			return
 		}
 		context.Request.ParseForm()
 		session := context.Request.Form.Get("session")
 		se := context.Input.Session("api")
 		if se == nil || Md5(fmt.Sprint(se.(int))) != session {
-			context.Output.JSON("未登录", true, true)
+			 re:= Response{Message:"未登录",Status:403}
+			context.Output.JSON(re, true, true)
 		}
 	})
 	beego.AddNamespace(ns)
@@ -61,4 +68,8 @@ func GetMD5(lurl string) string {
 //values  待加密的字符串
 func Md5(values string) string {
 	return GetMD5(values)
+}
+type Response struct {
+	Message string `json:"message"`
+	Status  int `json:"status"`
 }
