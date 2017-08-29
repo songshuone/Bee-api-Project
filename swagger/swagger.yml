@@ -11,6 +11,17 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 basePath: /v1
 paths:
+  /banner/:
+    get:
+      tags:
+      - banner
+      description: get banner
+      operationId: BannerControllers.get
+      responses:
+        "200":
+          description: '{int} models.Banner'
+        "403":
+          description: body is empty
   /user/:
     get:
       tags:
@@ -144,6 +155,23 @@ paths:
           description: '{string} login success!'
         "403":
           description: user no exist
+  /user/logout:
+    post:
+      tags:
+      - user
+      description: ModifyPwd the User
+      operationId: UserController.ModifyPwd
+      parameters:
+      - in: query
+        name: session
+        description: The id you want to modify
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string}注销成功'
+        "403":
+          description: 你还没有登录
   /user/modifypwd:
     post:
       tags:
@@ -153,6 +181,11 @@ paths:
       parameters:
       - in: query
         name: id
+        description: The id you want to modify
+        required: true
+        type: string
+      - in: query
+        name: session
         description: The id you want to modify
         required: true
         type: string
@@ -189,24 +222,48 @@ paths:
         "403":
           description: register fail
 definitions:
+  models.Post:
+    title: Post
+    type: object
+    properties:
+      Tags:
+        type: array
+        items:
+          $ref: '#/definitions/models.Tag'
+      id:
+        type: integer
+        format: int64
+      title:
+        type: string
+  models.Tag:
+    title: Tag
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
   models.User:
     title: User
     type: object
     properties:
-      Address:
+      address:
         type: string
-      Age:
+      age:
         type: integer
         format: int64
-      Email:
+      birthday:
         type: string
-      Id:
+      email:
+        type: string
+      id:
         type: integer
         format: int64
-      Name:
+      name:
         type: string
-      Password:
-        type: string
+      post:
+        $ref: '#/definitions/models.Post'
 tags:
 - name: user
   description: |

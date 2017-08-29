@@ -1,0 +1,64 @@
+一个用beego写的一个简单的服务器api 接口
+
+bee run -downdoc=true -gendoc=true
+
+使用stuct 自动生成数据库中的表：
+
+
+ func main() {
+     // orm.RegisterModel...
+     // orm.RegisterDataBase...
+     ...
+     orm.RunCommand()
+ }
+ go build main.go
+ ./main orm
+ # 直接执行可以显示帮助
+ # 如果你的程序可以支持的话，直接运行 go run main.go orm 也是一样的效果
+ 自动建表
+
+
+首先  在main.go中  写：
+
+// 数据库别名
+name := "default"
+
+// drop table 后再建表
+force := true
+
+// 打印执行过程
+verbose := true
+
+// 遇到错误立即返回
+err := orm.RunSyncdb(name, force, verbose)
+if err != nil {
+    fmt.Println(err)
+}
+
+
+
+执行命令：   main orm syncdb -h     就可以看到创建表的sql语句
+./main orm syncdb -h
+Usage of orm command: syncdb:
+  -db="default": DataBase alias name
+  -force=false: drop tables before create
+  -v=false: verbose info
+
+
+ 命令模式
+ 注册模型与数据库以后，调用 RunCommand 执行 orm 命令。
+
+
+
+
+//cookieName: 客户端存储 cookie 的名字。
+//enableSetCookie,omitempty: 是否开启 SetCookie,omitempty 这个设置
+//gclifetime: 触发 GC 的时间。
+//maxLifetime: 服务器端存储的数据的过期时间
+//secure: 是否开启 HTTPS，在 cookie 设置的时候有 cookie.Secure 设置。
+//sessionIDHashFunc: sessionID 生产的函数，默认是 sha1 算法。
+//sessionIDHashKey: hash 算法中的 key。
+//cookieLifeTime: 客户端存储的 cookie 的时间，默认值是 0，即浏览器生命周期。
+//providerConfig: 配置信息，根据不同的引擎设置不同的配置信息，详细的配置请看下面的引擎设置
+
+在sql文件夹中加入了  mysql的数据库   如果要学习的话   就把改数据库直接导入到你自己的本地数据库中，

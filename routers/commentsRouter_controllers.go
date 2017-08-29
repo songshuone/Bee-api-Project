@@ -7,6 +7,14 @@ import (
 
 func init() {
 
+	beego.GlobalControllerRouter["Bee-api-Project/controllers:BannerControllers"] = append(beego.GlobalControllerRouter["Bee-api-Project/controllers:BannerControllers"],
+		beego.ControllerComments{
+			Method: "GetBanner",
+			Router: `/`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
 	beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"] = append(beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"],
 		beego.ControllerComments{
 			Method: "Post",
@@ -52,6 +60,14 @@ func init() {
 			Method: "Login",
 			Router: `/login`,
 			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"] = append(beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"],
+		beego.ControllerComments{
+			Method: "Logout",
+			Router: `/logout`,
+			AllowHTTPMethods: []string{"post"},
 			MethodParams: param.Make(),
 			Params: nil})
 
