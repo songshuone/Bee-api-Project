@@ -61,3 +61,4 @@ Usage of orm command: syncdb:
 //cookieLifeTime: 客户端存储的 cookie 的时间，默认值是 0，即浏览器生命周期。
 //providerConfig: 配置信息，根据不同的引擎设置不同的配置信息，详细的配置请看下面的引擎设置
 
+在sql文件夹中加入了  mysql的数据库   如果要学习的话   就把改数据库直接导入到你自己的本地数据库中，
