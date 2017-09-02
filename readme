@@ -11,12 +11,14 @@ bee run -downdoc=true -gendoc=true
      ...
      orm.RunCommand()
  }
+ ======================
  go build main.go
  ./main orm
  # 直接执行可以显示帮助
  # 如果你的程序可以支持的话，直接运行 go run main.go orm 也是一样的效果
  自动建表
-
+=======================================
+//
 
 首先  在main.go中  写：
 
