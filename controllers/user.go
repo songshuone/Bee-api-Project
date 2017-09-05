@@ -9,6 +9,8 @@ import (
 	"github.com/astaxie/beego"
 	"fmt"
 	"time"
+	"github.com/DeanThompson/jpush-api-go-client/push"
+	"github.com/DeanThompson/jpush-api-go-client"
 )
 
 // UserController operations for User
@@ -22,6 +24,7 @@ func init() {
 	responseData.Result = ""
 	responseData.Status = 200
 	responseData.Message = ""
+	jpushClient.SetDebug(true)
 }
 
 // URLMapping ...
@@ -211,6 +214,9 @@ func (c *UserController) Login() {
 			c.SetSession("api", time.Now().Nanosecond()+666)
 		}
 		v = c.GetSession("api")
+
+		//Notifity("登陆成功","温馨提示！")
+		test_Push()
 		result.Session = models.Md5(fmt.Sprint(v.(int)))
 		responseData.Message = "登录成功"
 		responseData.Status = 200
@@ -299,6 +305,8 @@ func (u *UserController) ModifyPwd() {
 		v := u.GetSession("api")
 		if v != nil {
 			responseData.Message = "修改成功session;" + models.Md5(fmt.Sprint(v.(int)))
+
+
 		} else {
 			responseData.Message = "修改成功session=null"
 		}
@@ -310,6 +318,38 @@ func (u *UserController) ModifyPwd() {
 		u.Data["json"] = responseData.Response
 	}
 	u.ServeJSON()
+}
+
+const (
+	appKey       = "f7cc5881f5a0d47e4e077f8c"
+	masterSecret = "cc9b1ac39511483e35592d9f"
+)
+
+var jpushClient = jpush.NewJPushClient(appKey, masterSecret)
+
+
+/**
+  通知到客户端
+ */
+func Notifity(messageNotification string,titleNotification  string) {
+	platForm := push.NewPlatform()
+	platForm.Add("android")//设置指定平台
+	audience := push.NewAudience()
+	audience.All()//发送给所有人
+	androidNotification := push.NewAndroidNotification(messageNotification)
+	androidNotification.Title = titleNotification
+	notification := push.NewNotification("Notification Alert")
+	notification.Android = androidNotification
+	payload := push.NewPushObject()
+	payload.Platform = platForm
+	payload.Audience = audience
+	payload.Notification = notification
+	 result, err := jpushClient.Push(payload)
+	if err != nil {
+		fmt.Print("Push failed:", err)
+	} else {
+		fmt.Println("Push result:", result)
+	}
 }
 
 //ModifyPwd...
@@ -424,23 +464,101 @@ func (c *UserController) GetPostFromTag() {
 	}
 	c.ServeJSON()
 }
+
 //GetAllTag...
 //@Title GetAllTag
 // @Description GetAllTag the Post
 // @Success 200 {string}获取数据成功
 // @Failure 403 获取数据失败
 //@router /gettag [get]
-func (c * UserController)GetAllTag()  {
-	tags,err:=models.GetAllTag()
-	if err!=nil {
-		responseData.Status=403
-		responseData.Message=err.Error()
-		c.Data["json"]=responseData.Response
-	}else {
-		responseData.Status=200
-		responseData.Message="获取数据成功"
-		responseData.Result=tags
-		c.Data["json"]=responseData
+func (c *UserController) GetAllTag() {
+	tags, err := models.GetAllTag()
+	if err != nil {
+		responseData.Status = 403
+		responseData.Message = err.Error()
+		c.Data["json"] = responseData.Response
+	} else {
+		responseData.Status = 200
+		responseData.Message = "获取数据成功"
+		responseData.Result = tags
+		c.Data["json"] = responseData
 	}
 	c.ServeJSON()
+}
+func test_Push() {
+	// platform 对象
+	platform := push.NewPlatform()
+	// 用 Add() 方法添加具体平台参数，可选: "all", "ios", "android"
+	platform.Add( "android")
+	// 或者用 All() 方法设置所有平台
+	// platform.All()
+
+	// audience 对象，表示消息受众
+	audience := push.NewAudience()
+	//audience.SetTag([]string{"广州", "深圳"})   // 设置 tag
+	//audience.SetTagAnd([]string{"北京", "女"}) // 设置 tag_and
+	// 和 platform 一样，可以调用 All() 方法设置所有受众
+	 audience.All()
+
+	// notification 对象，表示 通知，传递 alert 属性初始化
+	notification := push.NewNotification("Notification Alert")
+
+	// android 平台专有的 notification，用 alert 属性初始化
+	androidNotification := push.NewAndroidNotification("Android Notification Alert")
+	androidNotification.Title = "title"
+	androidNotification.AddExtra("key", "value")
+
+	notification.Android = androidNotification
+
+	// iOS 平台专有的 notification，用 alert 属性初始化
+	//iosNotification := push.NewIosNotification("iOS Notification Alert")
+	//iosNotification.Badge = 1
+	// Validate 方法可以验证 iOS notification 是否合法
+	// 一般情况下，开发者不需要直接调用此方法，这个方法会在构造 PushObject 时自动调用
+	// iosNotification.Validate()
+
+	//notification.Ios = iosNotification
+
+	// Windows Phone 平台专有的 notification，用 alert 属性初始化
+	//wpNotification := push.NewWinphoneNotification("Winphone Notification Alert")
+	// 所有平台的专有 notification 都有 AddExtra 方法，用于添加 extra 信息
+	//wpNotification.AddExtra("key", "value")
+	//wpNotification.AddExtra("extra_key", "extra_value")
+
+	//notification.Winphone = wpNotification
+
+	// message 对象，表示 透传消息，用 content 属性初始化
+	message := push.NewMessage("Message Content must not be empty")
+	message.Title = "Message Title"
+    message.AddExtra("name","wp123")
+	// option 对象，表示推送可选项
+	options := push.NewOptions()
+	// iOS 平台，是否推送生产环境，false 表示开发环境；如果不指定，就是生产环境
+	options.ApnsProduction = true
+	// Options 的 Validate 方法会对 time_to_live 属性做范围限制，以满足 JPush 的规范
+	options.TimeToLive = 10000000
+	// Options 的 Validate 方法会对 big_push_duration 属性做范围限制，以满足 JPush 的规范
+	options.BigPushDuration = 1500
+
+	payload := push.NewPushObject()
+	payload.Platform = platform
+	payload.Audience = audience
+	payload.Notification = notification
+	payload.Message = message
+	//payload.Options = options
+
+	data, err := json.Marshal(payload)
+	if err != nil {
+		fmt.Println("json.Marshal PushObject failed:", err)
+	}
+	fmt.Println("payload:", string(data), "\n")
+
+	// Push 会推送到客户端
+	// result, err := client.Push(payload)
+	//	showErrOrResult("Push", result, err)
+
+	// PushValidate 的参数和 Push 完全一致
+	// 区别在于，PushValidate 只会验证推送调用成功，不会向用户发送任何消息
+	result, err := jpushClient.Push(payload)
+	fmt.Println("Push", result, err)
 }

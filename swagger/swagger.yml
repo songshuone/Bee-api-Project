@@ -347,8 +347,6 @@ definitions:
         type: string
       phone:
         type: string
-      post:
-        $ref: '#/definitions/models.Post'
 tags:
 - name: user
   description: |

@@ -515,9 +515,6 @@
                 },
                 "phone": {
                     "type": "string"
-                },
-                "post": {
-                    "$ref": "#/definitions/models.Post"
                 }
             }
         }

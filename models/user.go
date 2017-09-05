@@ -28,7 +28,7 @@ type User struct {
 	Birthday string `json:"birthday",orm:"column(birthday);size(20);null"`
 	Phone    string `json:"phone",orm:"column(phone);null;size(11)"`
 	//Birthday string `orm:"_"`
-	Post *Post `orm:"rel(fk);on_delete(do_nothing);null" json:"post"`
+	Post *Post `orm:"rel(fk);on_delete(do_nothing);null" json:"-"`
 }
 type Post struct {
 	Id         int `json:"id"`
@@ -301,6 +301,7 @@ func GetPostFromId(postID int) *Post {
 	if erro := o.Read(&post); erro != nil {
 		return nil
 	}
+	o.Read(post.User)
 	return &post
 }
 
@@ -309,11 +310,13 @@ func GetPostFromId(postID int) *Post {
  */
 func GetAllPost(limit int, offset int) ([]*Post, error) {
 	o := orm.NewOrm()
-	var post []*Post
-	if _, erro := o.QueryTable(new(Post)).Limit(limit, offset).All(&post); erro != nil {
+	var posts []*Post
+	if _, erro := o.QueryTable(new(Post)).Limit(limit, offset).Distinct().OrderBy("-create_date").All(&posts); erro != nil {
 		return nil, erro
 	} else {
-		return post, erro
+		for _,post:=range posts{
+			o.QueryTable(new(Tag)).Filter("Posts__Post__Id",post.Id).One(&post.Tags)
+		}
+		return posts, erro
 	}
-
 }
