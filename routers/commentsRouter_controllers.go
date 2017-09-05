@@ -57,6 +57,38 @@ func init() {
 
 	beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"] = append(beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"],
 		beego.ControllerComments{
+			Method: "GetAllPost",
+			Router: `/getpost`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"] = append(beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"],
+		beego.ControllerComments{
+			Method: "GetPostFromId",
+			Router: `/getpostfromid`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"] = append(beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"],
+		beego.ControllerComments{
+			Method: "GetPostFromTag",
+			Router: `/getpostfromtagId`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"] = append(beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"],
+		beego.ControllerComments{
+			Method: "GetAllTag",
+			Router: `/gettag`,
+			AllowHTTPMethods: []string{"get"},
+			MethodParams: param.Make(),
+			Params: nil})
+
+	beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"] = append(beego.GlobalControllerRouter["Bee-api-Project/controllers:UserController"],
+		beego.ControllerComments{
 			Method: "Login",
 			Router: `/login`,
 			AllowHTTPMethods: []string{"get"},

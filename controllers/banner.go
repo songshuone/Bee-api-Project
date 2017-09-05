@@ -14,6 +14,7 @@ type BannerControllers struct {
 }
 
 func init() {
+
 	urlcache, _ = cache.NewCache("memory", `{"interval":0}`)
 }
 

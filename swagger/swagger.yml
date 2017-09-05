@@ -133,6 +133,77 @@ paths:
           description: '{string} delete success!'
         "403":
           description: id is empty
+  /user/getpost:
+    get:
+      tags:
+      - user
+      description: getAllPost the Post
+      operationId: UserController.getAllPost
+      parameters:
+      - in: query
+        name: limit
+        description: The id you want to modify
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: offset
+        description: The id you want to modify
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: '{string}获取数据成功'
+        "403":
+          description: 获取数据失败
+  /user/getpostfromid:
+    get:
+      tags:
+      - user
+      description: GetPostFromId the Post
+      operationId: UserController.GetPostFromId
+      parameters:
+      - in: query
+        name: postId
+        description: The id you want to modify
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: '{string}获取数据成功'
+        "403":
+          description: 获取数据失败
+  /user/getpostfromtagId:
+    get:
+      tags:
+      - user
+      description: GetPostFromTag the Post
+      operationId: UserController.GetPostFromTag
+      parameters:
+      - in: query
+        name: tagId
+        description: The id you want to modify
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: '{string}获取数据成功'
+        "403":
+          description: 获取数据失败
+  /user/gettag:
+    get:
+      tags:
+      - user
+      description: GetAllTag the Post
+      operationId: UserController.GetAllTag
+      responses:
+        "200":
+          description: '{string}获取数据成功'
+        "403":
+          description: 获取数据失败
   /user/login:
     get:
       tags:
@@ -226,13 +297,25 @@ definitions:
     title: Post
     type: object
     properties:
-      Tags:
-        type: array
-        items:
-          $ref: '#/definitions/models.Tag'
+      User:
+        $ref: '#/definitions/models.User'
+      content:
+        type: string
+      create_date:
+        type: string
+        format: string
       id:
         type: integer
         format: int64
+      img_desc:
+        type: string
+      praise_num:
+        type: integer
+        format: int64
+      tags:
+        type: array
+        items:
+          $ref: '#/definitions/models.Tag'
       title:
         type: string
   models.Tag:
@@ -248,6 +331,9 @@ definitions:
     title: User
     type: object
     properties:
+      Id:
+        type: integer
+        format: int64
       address:
         type: string
       age:
@@ -257,10 +343,9 @@ definitions:
         type: string
       email:
         type: string
-      id:
-        type: integer
-        format: int64
       name:
+        type: string
+      phone:
         type: string
       post:
         $ref: '#/definitions/models.Post'

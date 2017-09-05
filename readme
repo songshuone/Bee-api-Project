@@ -39,7 +39,7 @@ if err != nil {
 
 
 
-执行命令：   main orm syncdb -h     就可以看到创建表的sql语句
+执行命令：   main orm syncdb -v     就可以看到创建表的sql语句
 ./main orm syncdb -h
 Usage of orm command: syncdb:
   -db="default": DataBase alias name

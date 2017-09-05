@@ -10,6 +10,7 @@ import (
 	"crypto/md5"
 	"io"
 	"math"
+	"time"
 )
 
 type UserLogin struct {
@@ -18,28 +19,31 @@ type UserLogin struct {
 }
 
 type User struct {
-	Id       int    `orm:"column(id);auto"json:"id"`
+	Id       int    `orm:"column(id);auto",json:"id"`
 	Name     string `orm:"column(name);size(10)" json:"name"`
 	Password string `orm:"column(password);size(255)"json:"-"` //json:"-"忽略此字段
-	Address  string `json:"address"orm:"column(address);size(20);null"`
-	Age      int    `json:"age"orm:"column(age);null"`
-	Email    string `json:"email"orm:"column(email);size(20);null"`
-	Birthday string `json:"birthday"orm:"column(birthday);size(20);null"`
+	Address  string `json:"address",orm:"column(address);size(20);null"`
+	Age      int    `json:"age",orm:"column(age);null"`
+	Email    string `json:"email",orm:"column(email);size(20);null"`
+	Birthday string `json:"birthday",orm:"column(birthday);size(20);null"`
+	Phone    string `json:"phone",orm:"column(phone);null;size(11)"`
 	//Birthday string `orm:"_"`
 	Post *Post `orm:"rel(fk);on_delete(do_nothing);null" json:"post"`
 }
 type Post struct {
-	Id    int `json:"id"`
-	Title string `json:"title",orm:"null"`
-	Tags  []*Tag `orm:"rel(m2m);null;rel_table(post_tag_rel)",json:"tags"`
+	Id         int `json:"id"`
+	Title      string `json:"title"orm:"null"`
+	Tags       []*Tag `orm:"rel(m2m);null;rel_table(post_tag_rel)"json:"tags"`
+	Content    string `json:"content",orm:"column(content);size(100);null"`
+	CreateDate time.Time `orm:"auto_now_add;type(datetime)" json:"create_date"`
+	ImgDesc    string `json:"img_desc"orm:"column(img_desc);size(100);null"`
+
+	//点赞数量
+	PraiseNum int64 `json:"praise_num",orm:"column(praise_num);null"`
+	//踩数量
+	TreadNum int64 `json:"praise_num",orm:"column(praise_num);null"`
+	User     *User `orm:"rel(fk);on_delete(do_nothing);null",json:"user"`
 }
-
-//type PostTagRel struct{
-//	Id int `json:"id"`
-//	Posts *Post `json:"posts"`
-//	Tags *Tag `json:"tags"`
-//}
-
 type Tag struct {
 	Id    int `json:"id"`
 	Name  string `orm:"null;" json:"name"`
@@ -213,11 +217,12 @@ func Login(name string, password string) (bool, *User) {
 }
 func GetMD5(lurl string) string {
 	h := md5.New()
-	salt1 := "salt4shorturlwp123"+fmt.Sprint(math.Phi*math.Pi)
+	salt1 := "salt4shorturlwp123" + fmt.Sprint(math.Phi*math.Pi)
 	io.WriteString(h, lurl+salt1)
 	urlmd5 := fmt.Sprintf("%x", h.Sum(nil))
 	return urlmd5
 }
+
 //md5加密        return 加密 后的字符串
 //values  待加密的字符串
 func Md5(values string) string {
@@ -261,30 +266,54 @@ func ModifyPwd(uid string, password string) error {
 	}
 }
 
+/**
+获取所有的Tag
+ */
+func GetAllTag() ([]*Tag ,error){
+	o:=orm.NewOrm()
+	var tags []*Tag
+	if _,err:=o.QueryTable(new(Tag)).All(&tags);err!=nil{
+           return nil,err
+	}else {
+		return tags,err
+	}
+}
 
-//func GAO()  {
-//	o:=orm.NewOrm()
-//	qs:=o.QueryTable("user")
-//	qs.Filter("name","wp123")
-//
-//
-//	qs.Exclude("address__isnull",true).Filter("name","wp1234")
-//
-//
-//	qs.Limit(10)//限制10条数据
-//
-//	qs.Limit(10,20)
-//
-//	qs.Limit(-1)//不限制
-//
-//	qs.GroupBy("id","age")
-//
-//	qs.OrderBy("id")
-//	qs.Distinct()//返回 不重复的数据
-//	//age在原来的基础上增加10    支持加减乘除
-//	qs.Update(orm.Params{"name":"wp","age":orm.ColValue(orm.ColAdd,10),"address":"gs供电所"})
-//
-//
-//	i,_:=qs.PrepareInsert()
-//	i.Insert(User{})
-//}
+/**
+根据tag来获取文章
+ */
+func GetPostFromTag(tagId int) ([]*Post, error) {
+	o := orm.NewOrm()
+	var posts []*Post
+	_, erro := o.QueryTable(new(Post)).Filter("Tags__Tag__Id", tagId).All(&posts)
+	if erro != nil {
+		return nil, erro
+	}
+	return posts, nil
+}
+
+/**
+根据文章id获取获取文章
+ */
+func GetPostFromId(postID int) *Post {
+	o := orm.NewOrm()
+	post := Post{Id: postID}
+	if erro := o.Read(&post); erro != nil {
+		return nil
+	}
+	return &post
+}
+
+/**
+获取所有的文章
+ */
+func GetAllPost(limit int, offset int) ([]*Post, error) {
+	o := orm.NewOrm()
+	var post []*Post
+	if _, erro := o.QueryTable(new(Post)).Limit(limit, offset).All(&post); erro != nil {
+		return nil, erro
+	} else {
+		return post, erro
+	}
+
+}

@@ -35,6 +35,10 @@ func (c *UserController) URLMapping() {
 	c.Mapping("RegisterUser", c.RegisterUser)
 	c.Mapping("ModifyPwd", c.ModifyPwd)
 	c.Mapping("Logout", c.Logout)
+	c.Mapping("GetAllPost", c.GetAllPost)
+	c.Mapping("GetPostFromId", c.GetPostFromId)
+	c.Mapping("GetPostFromTag", c.GetPostFromTag)
+	c.Mapping("GetAllTag", c.GetAllTag)
 }
 
 // Post ...
@@ -163,6 +167,7 @@ func (c *UserController) Put() {
 	} else {
 		c.Data["json"] = err.Error()
 	}
+
 	c.ServeJSON()
 }
 
@@ -306,6 +311,7 @@ func (u *UserController) ModifyPwd() {
 	}
 	u.ServeJSON()
 }
+
 //ModifyPwd...
 //@Title ModifyPwd
 // @Description ModifyPwd the User
@@ -314,10 +320,10 @@ func (u *UserController) ModifyPwd() {
 // @Failure 403 你还没有登录
 //@router /logout [post]
 func (c *UserController) Logout() {
-	if CheckIsLogin(c)!=nil {
+	if CheckIsLogin(c) != nil {
 		responseData.Message = "你还没有登录！"
 		responseData.Status = 403
-	}else {
+	} else {
 		c.SetSession("api", nil)
 		responseData.Message = "注销成功"
 	}
@@ -333,4 +339,110 @@ func CheckIsLogin(c *UserController) error {
 		return nil
 	}
 	return errors.New("你还没有登录哦")
+
+}
+
+//getAllPost...
+//@Title getAllPost
+// @Description getAllPost the Post
+// @Param	limit		query 	int	true		"The id you want to modify"
+// @Param	offset		query 	int	true		"The id you want to modify"
+// @Success 200 {string}获取数据成功
+// @Failure 403 获取数据失败
+//@router /getpost [get]
+func (c *UserController) GetAllPost() {
+	limit, erro := strconv.Atoi(c.GetString("limit"))
+	offset, offseterro := strconv.Atoi(c.GetString("offset"))
+	if erro != nil && offseterro != nil {
+		responseData.Message = fmt.Sprint(erro, offseterro)
+		responseData.Status = 403
+		c.Data["json"] = responseData.Response
+	} else {
+		data, erro := models.GetAllPost(limit, offset)
+		if erro != nil {
+			responseData.Message = erro.Error()
+			responseData.Status = 403
+			c.Data["json"] = responseData.Response
+		} else {
+			responseData.Result = data
+			responseData.Status = 200
+			responseData.Message = "获取数据成功"
+			c.Data["json"] = responseData
+		}
+	}
+	c.ServeJSON()
+}
+
+//GetPostFromId...
+//@Title GetPostFromId
+// @Description GetPostFromId the Post
+// @Param	postId		query 	int	true		"The id you want to modify"
+// @Success 200 {string}获取数据成功
+// @Failure 403 获取数据失败
+//@router /getpostfromid [get]
+func (c *UserController) GetPostFromId() {
+
+	postId, erro := strconv.Atoi(c.GetString("postId"))
+
+	if erro != nil {
+		responseData.Message = erro.Error()
+		responseData.Status = 403
+		c.Data["json"] = responseData.Response
+	} else {
+		post := models.GetPostFromId(postId)
+		responseData.Status = 200
+		responseData.Message = "获取数据成功"
+		responseData.Result = post
+		c.Data["json"] = responseData
+	}
+	c.ServeJSON()
+}
+
+//GetPostFromTag...
+//@Title GetPostFromTag
+// @Description GetPostFromTag the Post
+// @Param	tagId		query 	int	true		"The id you want to modify"
+// @Success 200 {string}获取数据成功
+// @Failure 403 获取数据失败
+//@router /getpostfromtagId [get]
+func (c *UserController) GetPostFromTag() {
+	tagId, err := strconv.Atoi(c.GetString("tagId"))
+	if err != nil {
+		responseData.Message = err.Error()
+		responseData.Status = 403
+		c.Data["json"] = responseData.Response
+	} else {
+		posts, erro := models.GetPostFromTag(tagId)
+		if erro != nil {
+			responseData.Message = erro.Error()
+			responseData.Status = 403
+			c.Data["json"] = responseData.Response
+		} else {
+			responseData.Message = "获取数据成功"
+			responseData.Status = 200
+			responseData.Result = posts
+			c.Data["json"] = responseData
+		}
+	}
+	c.ServeJSON()
+}
+//GetAllTag...
+//@Title GetAllTag
+// @Description GetAllTag the Post
+// @Success 200 {string}获取数据成功
+// @Failure 403 获取数据失败
+//@router /gettag [get]
+func (c * UserController)GetAllTag()  {
+	tags,err:=models.GetAllTag()
+	if err!=nil {
+		responseData.Status=403
+		responseData.Message=err.Error()
+		c.Data["json"]=responseData.Response
+	}else {
+		responseData.Status=200
+		responseData.Message="获取数据成功"
+		responseData.Result=tags
+		c.Data["json"]=responseData
+	}
+	c.ServeJSON()
 }
