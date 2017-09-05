@@ -381,9 +381,7 @@ func (c *UserController) GetAllPost() {
 // @Failure 403 获取数据失败
 //@router /getpostfromid [get]
 func (c *UserController) GetPostFromId() {
-
 	postId, erro := strconv.Atoi(c.GetString("postId"))
-
 	if erro != nil {
 		responseData.Message = erro.Error()
 		responseData.Status = 403
