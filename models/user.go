@@ -36,8 +36,6 @@ type Post struct {
 	Tags       []*Tag `orm:"rel(m2m);null;rel_table(post_tag_rel)"json:"tags"`
 	Content    string `json:"content",orm:"column(content);size(100);null"`
 	CreateDate time.Time `orm:"auto_now_add;type(datetime)" json:"create_date"`
-	ImgDesc    string `json:"img_desc"orm:"column(img_desc);size(100);null"`
-
 	//点赞数量
 	PraiseNum int64 `json:"praise_num",orm:"column(praise_num);null"`
 	//踩数量
@@ -269,13 +267,13 @@ func ModifyPwd(uid string, password string) error {
 /**
 获取所有的Tag
  */
-func GetAllTag() ([]*Tag ,error){
-	o:=orm.NewOrm()
+func GetAllTag() ([]*Tag, error) {
+	o := orm.NewOrm()
 	var tags []*Tag
-	if _,err:=o.QueryTable(new(Tag)).All(&tags);err!=nil{
-           return nil,err
-	}else {
-		return tags,err
+	if _, err := o.QueryTable(new(Tag)).All(&tags); err != nil {
+		return nil, err
+	} else {
+		return tags, err
 	}
 }
 
@@ -308,15 +306,39 @@ func GetPostFromId(postID int) *Post {
 /**
 获取所有的文章
  */
-func GetAllPost(limit int, offset int) ([]*Post, error) {
+func GetAllPost(limit int, offset int) ([]*Post, error, int64) {
 	o := orm.NewOrm()
 	var posts []*Post
-	if _, erro := o.QueryTable(new(Post)).Limit(limit, offset).Distinct().OrderBy("-create_date").All(&posts); erro != nil {
-		return nil, erro
-	} else {
-		for _,post:=range posts{
-			o.QueryTable(new(Tag)).Filter("Posts__Post__Id",post.Id).One(&post.Tags)
-		}
-		return posts, erro
+	count, erro := o.QueryTable(new(Post)).Limit(limit, offset).Distinct().OrderBy("-create_date").Count()
+	if erro != nil {
+		return nil, erro, 0
 	}
+	if _, erro := o.QueryTable(new(Post)).Limit(limit, offset).Distinct().OrderBy("-create_date").All(&posts); erro != nil {
+		return nil, erro, 0
+	} else {
+		for _, post := range posts {
+			o.QueryTable(new(Tag)).Filter("Posts__Post__Id", post.Id).One(&post.Tags)
+		}
+		return posts, erro, count
+	}
+}
+
+func CreatePost(tagId int, title string, content string) error {
+	o := orm.NewOrm()
+	tag := &Tag{Id: tagId}
+	erro := o.Read(tag)
+	if erro == nil {
+		post := Post{Title: title, Content: content}
+		_, erro := o.Insert(&post)
+		if erro == nil {
+			m2m := o.QueryM2M(&post, "Tags")
+			_, erro := m2m.Add(tag)
+			if erro == nil {
+				return erro
+			}
+			return erro
+		}
+		return erro
+	}
+	return erro
 }

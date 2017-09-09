@@ -42,6 +42,7 @@ func (c *UserController) URLMapping() {
 	c.Mapping("GetPostFromId", c.GetPostFromId)
 	c.Mapping("GetPostFromTag", c.GetPostFromTag)
 	c.Mapping("GetAllTag", c.GetAllTag)
+	c.Mapping("CreatePost", c.CreatePost)
 }
 
 // Post ...
@@ -215,8 +216,8 @@ func (c *UserController) Login() {
 		}
 		v = c.GetSession("api")
 
-		//Notifity("登陆成功","温馨提示！")
-		test_Push()
+		Notifity("登陆成功", "温馨提示！")
+		//test_Push()
 		result.Session = models.Md5(fmt.Sprint(v.(int)))
 		responseData.Message = "登录成功"
 		responseData.Status = 200
@@ -306,7 +307,6 @@ func (u *UserController) ModifyPwd() {
 		if v != nil {
 			responseData.Message = "修改成功session;" + models.Md5(fmt.Sprint(v.(int)))
 
-
 		} else {
 			responseData.Message = "修改成功session=null"
 		}
@@ -327,15 +327,14 @@ const (
 
 var jpushClient = jpush.NewJPushClient(appKey, masterSecret)
 
-
 /**
   通知到客户端
  */
-func Notifity(messageNotification string,titleNotification  string) {
+func Notifity(messageNotification string, titleNotification string) {
 	platForm := push.NewPlatform()
-	platForm.Add("android")//设置指定平台
+	platForm.Add("android") //设置指定平台
 	audience := push.NewAudience()
-	audience.All()//发送给所有人
+	audience.All() //发送给所有人
 	androidNotification := push.NewAndroidNotification(messageNotification)
 	androidNotification.Title = titleNotification
 	notification := push.NewNotification("Notification Alert")
@@ -344,7 +343,7 @@ func Notifity(messageNotification string,titleNotification  string) {
 	payload.Platform = platForm
 	payload.Audience = audience
 	payload.Notification = notification
-	 result, err := jpushClient.Push(payload)
+	result, err := jpushClient.Push(payload)
 	if err != nil {
 		fmt.Print("Push failed:", err)
 	} else {
@@ -391,6 +390,7 @@ func CheckIsLogin(c *UserController) error {
 // @Failure 403 获取数据失败
 //@router /getpost [get]
 func (c *UserController) GetAllPost() {
+
 	limit, erro := strconv.Atoi(c.GetString("limit"))
 	offset, offseterro := strconv.Atoi(c.GetString("offset"))
 	if erro != nil && offseterro != nil {
@@ -398,13 +398,13 @@ func (c *UserController) GetAllPost() {
 		responseData.Status = 403
 		c.Data["json"] = responseData.Response
 	} else {
-		data, erro := models.GetAllPost(limit, offset)
+		data, erro ,count:= models.GetAllPost(limit, offset)
 		if erro != nil {
 			responseData.Message = erro.Error()
 			responseData.Status = 403
 			c.Data["json"] = responseData.Response
 		} else {
-			responseData.Result = data
+			responseData.Result = models.ResponseTotal{count,data}
 			responseData.Status = 200
 			responseData.Message = "获取数据成功"
 			c.Data["json"] = responseData
@@ -489,7 +489,7 @@ func test_Push() {
 	// platform 对象
 	platform := push.NewPlatform()
 	// 用 Add() 方法添加具体平台参数，可选: "all", "ios", "android"
-	platform.Add( "android")
+	platform.Add("android")
 	// 或者用 All() 方法设置所有平台
 	// platform.All()
 
@@ -498,7 +498,7 @@ func test_Push() {
 	//audience.SetTag([]string{"广州", "深圳"})   // 设置 tag
 	//audience.SetTagAnd([]string{"北京", "女"}) // 设置 tag_and
 	// 和 platform 一样，可以调用 All() 方法设置所有受众
-	 audience.All()
+	audience.All()
 
 	// notification 对象，表示 通知，传递 alert 属性初始化
 	notification := push.NewNotification("Notification Alert")
@@ -530,7 +530,7 @@ func test_Push() {
 	// message 对象，表示 透传消息，用 content 属性初始化
 	message := push.NewMessage("Message Content must not be empty")
 	message.Title = "Message Title"
-    message.AddExtra("name","wp123")
+	message.AddExtra("name", "wp123")
 	// option 对象，表示推送可选项
 	options := push.NewOptions()
 	// iOS 平台，是否推送生产环境，false 表示开发环境；如果不指定，就是生产环境
@@ -561,4 +561,36 @@ func test_Push() {
 	// 区别在于，PushValidate 只会验证推送调用成功，不会向用户发送任何消息
 	result, err := jpushClient.Push(payload)
 	fmt.Println("Push", result, err)
+}
+
+//CreatePost...
+//@Title CreatePost
+// @Description CreatePost the Post
+// @Param	tagId		query 	string	true		"The id you want to modify"
+// @Param	title		query 	string	true		"The id you want to modify"
+// @Param	content		query 	string	true		"The id you want to modify"
+// @Success 200 {string}成功
+// @Failure 403 获取数据失败
+//@router /createpost [post]
+func (u *UserController) CreatePost() {
+
+	tagId, erro := strconv.Atoi(u.GetString("tagId"))
+	if erro != nil {
+		responseData.Status = 403
+		responseData.Message = erro.Error()
+	} else {
+		title := u.GetString("title")
+		content := u.GetString("content")
+		erro = models.CreatePost(tagId, title, content)
+		if (erro != nil) {
+			responseData.Status = 403
+			responseData.Message = erro.Error()
+		} else {
+			responseData.Status = 200
+			responseData.Message = "创建成功"
+		}
+	}
+
+	u.Data["json"] = responseData.Response
+	u.ServeJSON()
 }

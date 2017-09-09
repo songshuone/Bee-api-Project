@@ -36,21 +36,29 @@ func init() {
 		),
 	)
 	ns.Filter("before", func(context *context.Context) {
-		requestUrl:=context.Request.RequestURI
-		if strings.Contains(requestUrl , "/v1/user/login" ){
+
+		//防止跨域问题
+		context.ResponseWriter.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+		context.ResponseWriter.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS")
+		context.ResponseWriter.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
+		context.ResponseWriter.Header().Set("Access-Control-Max-Age", "1728000")
+		context.ResponseWriter.Header().Set("content-type", "application/json")
+		context.ResponseWriter.Header().Set("Access-Control-Allow-Credentials", "true")
+		requestUrl := context.Request.RequestURI
+		if strings.Contains(requestUrl, "/v1/user/login") {
 			return
 		}
-		if  strings.Contains(requestUrl,"banner"){
+		if strings.Contains(requestUrl, "banner") {
 			return
 		}
-		if  strings.Contains(requestUrl,"v1"){
+		if strings.Contains(requestUrl, "v1") {
 			return
 		}
 		context.Request.ParseForm()
 		session := context.Request.Form.Get("session")
 		se := context.Input.Session("api")
 		if se == nil || Md5(fmt.Sprint(se.(int))) != session {
-			 re:= Response{Message:"未登录",Status:403}
+			re := Response{Message: "未登录", Status: 403}
 			context.Output.JSON(re, true, true)
 		}
 	})
@@ -69,6 +77,7 @@ func GetMD5(lurl string) string {
 func Md5(values string) string {
 	return GetMD5(values)
 }
+
 type Response struct {
 	Message string `json:"message"`
 	Status  int `json:"status"`

@@ -133,6 +133,33 @@ paths:
           description: '{string} delete success!'
         "403":
           description: id is empty
+  /user/createpost:
+    post:
+      tags:
+      - user
+      description: CreatePost the Post
+      operationId: UserController.CreatePost
+      parameters:
+      - in: query
+        name: tagId
+        description: The id you want to modify
+        required: true
+        type: string
+      - in: query
+        name: title
+        description: The id you want to modify
+        required: true
+        type: string
+      - in: query
+        name: content
+        description: The id you want to modify
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string}成功'
+        "403":
+          description: 获取数据失败
   /user/getpost:
     get:
       tags:
@@ -307,8 +334,6 @@ definitions:
       id:
         type: integer
         format: int64
-      img_desc:
-        type: string
       praise_num:
         type: integer
         format: int64

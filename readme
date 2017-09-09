@@ -1,7 +1,7 @@
 一个用beego写的一个简单的服务器api 接口
 
-bee run -downdoc=true -gendoc=true
 
+bee run -downdoc=true -gendoc=true
 使用stuct 自动生成数据库中的表：
 
 
